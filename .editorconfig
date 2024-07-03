@@ -1,0 +1,16 @@
+﻿[*.{cs,vb}]
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# IDE0017: Simplify object initialization
+dotnet_style_object_initializer = false
+
+# IDE0028: Use collection initializers
+dotnet_style_collection_initializer = false
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none
+
+# SA1010: Opening square brackets should be spaced correctly
+dotnet_diagnostic.SA1010.severity = none
