@@ -37,6 +37,48 @@ function guidv4($data = null)
 	return $text;
 }
 
+function postSensorData($data)
+{
+	$url = 'https://vanilla.kitchen/api/sensors';
+
+	$jsonData = json_encode($data);
+
+	$curl = curl_init($url);
+
+	$options =
+	[
+		'Content-Type: application/json'
+	];
+
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_HTTPHEADER, $options);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonData);
+
+	$response = curl_exec($curl);
+
+	$httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    
+    if ($response === false)
+	{
+		$error = curl_error($curl);
+		$result = ['error' => 'cURL error: ' . $error];
+	}
+	else
+	{
+		$result =
+		[
+			'status' => $httpCode,
+			'response' => json_decode($response, true)
+		];
+	}
+
+	curl_close($curl);
+
+
+	return $result;
+}
+
 function request($url, $token, $secret)
 {
 	$nonce = guidv4();
@@ -87,34 +129,61 @@ function updateEncoding($text)
 	 return $encoding;
 }
 
+/****************************************************************************/
+// Begin
 $argv = $GLOBALS['argv'];
 
-$token = $argv[1];
-$secret = $argv[2];
+$token = '9f0067f6446c17fb2759a732e1a063e524eb2586b444dd60d80941af17f7598cdbc93274374f9277d5f32a8ad877b5cb'; $secret = '2f28e8988dac3d763acdd5dca5dcfecc';
 
 $url = "https://api.switch-bot.com/v1.1/devices";
+
+$now = date('Y-m-d H:i:s');
+echo PHP_EOL . 'Sending at: ' . $now . PHP_EOL;
 
 $response = request($url, $token, $secret);
 
 $response = getResponseObject($response);
-var_dump($response);
-echo "\n\n";
+// var_dump($response);
+// echo "\n\n";
 
-$devices = $response->body->deviceList;
+$isObject = is_object($response);
 
-foreach ($devices as $device)
+if ($isObject === true)
 {
-	$exists = str_contains($device->deviceName, 'Hub Mini');
+	$devices = $response->body->deviceList;
 
-	if ($exists === false)
+	$finish = false;
+	$index = 0;
+
+	foreach ($devices as $device)
 	{
-		$url = 'https://api.switch-bot.com/v1.1/devices/' .
-			$device->deviceId . '/status';
+		$exists = str_contains($device->deviceName, 'Hub Mini');
 
-		$response = request($url, $token, $secret);
+		if ($exists === false)
+		{
+			$url = 'https://api.switch-bot.com/v1.1/devices/' .
+				$device->deviceId . '/status';
 
-		$response = getResponseObject($response);
-		var_dump($response);
-		echo "\n\n";
+			$response = request($url, $token, $secret);
+
+			$response = getResponseObject($response);
+			// var_dump($response);
+			// echo "\n\n";
+
+			$isObject = is_object($response);
+
+			if ($isObject === true)
+			{
+				$body = $response->body;
+				$jsonData = json_encode($body);
+				echo 'Sending Data: ' . $jsonData . PHP_EOL;
+			}
+
+			$result = postSensorData($body);
+			echo 'Data Sent to Vanilla - Result: ' . $result['status'] . PHP_EOL;
+			echo "\n\n";
+
+			sleep(15);
+		}
 	}
 }
