@@ -1,6 +1,6 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 // <copyright file="AutomatedTests.cs" company="Digital Zen Works">
-// Copyright © 2024 Digital Zen Works. All Rights Reserved.
+// Copyright © 2024 - 2026 Digital Zen Works. All Rights Reserved.
 // </copyright>
 /////////////////////////////////////////////////////////////////////////////
 using InTheHand.Bluetooth;
